@@ -1,32 +1,17 @@
 name: ShellCheck on RHEL
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push, pull_request]
 
 jobs:
   shellcheck:
-    # Use GitHub's Ubuntu runner as the host, but run the job in a RHEL container
     runs-on: ubuntu-latest
     container:
-      # Use a Red Hat Universal Base Image (UBI) for a RHEL-like environment.
-      image: registry.access.redhat.com/ubi8/ubi:latest
-
+      image: registry.access.redhat.com/ubi8/ubi
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Install ShellCheck from EPEL
-        run: |
-          # Enable the Extra Packages for Enterprise Linux repository
-          yum install -y epel-release
-          # Install ShellCheck (if available from EPEL)
-          yum install -y shellcheck
-          yum clean all
-
-      - name: Run ShellCheck
-        run: |
-          # Find all .sh files and check them with ShellCheck
-          find . -name "*.sh" -print0 | xargs -0 shellcheck
+    - name: Install ShellCheck
+      run: |
+        yum install -y epel-release
+        yum install -y shellcheck
+        yum clean all
+    - name: Run ShellCheck
+      run: shellcheck your_script.sh
