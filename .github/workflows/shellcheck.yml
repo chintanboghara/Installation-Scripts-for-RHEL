@@ -9,17 +9,33 @@ on:
       - main
 
 jobs:
-  shellcheck:
-    name: Run ShellCheck
+  shellcheck_ubuntu:
+    name: ShellCheck on Ubuntu
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install ShellCheck
-        run: sudo apt-get install -y shellcheck
+      - name: Install ShellCheck on Ubuntu
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
 
       - name: Run ShellCheck
+        run: find . -name "*.sh" -print0 | xargs -0 shellcheck
+
+  shellcheck_rhel:
+    name: ShellCheck on RHEL
+    # This job requires a self-hosted runner labeled "rhel"
+    runs-on: [self-hosted, rhel]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck on RHEL
         run: |
-          find . -name "*.sh" -print0 | xargs -0 shellcheck
+          sudo yum install -y epel-release
+          sudo yum install -y ShellCheck
+
+      - name: Run ShellCheck
+        run: find . -name "*.sh" -print0 | xargs -0 shellcheck
