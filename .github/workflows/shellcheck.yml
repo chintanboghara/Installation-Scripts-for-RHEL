@@ -1,41 +1,32 @@
-name: ShellCheck Linter
+name: ShellCheck on RHEL
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  shellcheck_ubuntu:
-    name: ShellCheck on Ubuntu
+  shellcheck:
+    # Use GitHub's Ubuntu runner as the host, but run the job in a RHEL container
     runs-on: ubuntu-latest
+    container:
+      # Use a Red Hat Universal Base Image (UBI) for a RHEL-like environment.
+      image: registry.access.redhat.com/ubi8/ubi:latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install ShellCheck on Ubuntu
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
-
-      - name: Run ShellCheck
-        run: find . -name "*.sh" -print0 | xargs -0 shellcheck
-
-  shellcheck_rhel:
-    name: ShellCheck on RHEL
-    # This job requires a self-hosted runner labeled "rhel"
-    runs-on: [self-hosted, rhel]
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Install ShellCheck on RHEL
+      - name: Install ShellCheck from EPEL
         run: |
-          sudo yum install -y epel-release
-          sudo yum install -y ShellCheck
+          # Enable the Extra Packages for Enterprise Linux repository
+          yum install -y epel-release
+          # Install ShellCheck (if available from EPEL)
+          yum install -y shellcheck
+          yum clean all
 
       - name: Run ShellCheck
-        run: find . -name "*.sh" -print0 | xargs -0 shellcheck
+        run: |
+          # Find all .sh files and check them with ShellCheck
+          find . -name "*.sh" -print0 | xargs -0 shellcheck
